@@ -10,7 +10,7 @@ import PencilSketch from './pages/artworks/PencilSketch';
 import WaterColor from './pages/artworks/WaterColor';
 import AcrylicColor from './pages/artworks/AcrylicColor';
 import Crafts from './pages/artworks/Crafts';
-import Modeling from './pages/artworks/modeling';
+import Modeling from './pages/artworks/Modeling';
 import Contact from './pages/Contact';
 
 // Component imports
