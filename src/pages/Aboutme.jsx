@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-  AnimatePresence,
-  useReducedMotion,
+import { 
+  motion, 
+  useScroll, 
+  useTransform, 
+  useInView, 
+  AnimatePresence, 
+  useReducedMotion 
 } from 'framer-motion';
-import { Helmet } from 'react-helmet-async';
 
 // Keep the original image path as requested
 import artistPhoto from '../assets/Bushra.jpg';
@@ -19,9 +18,9 @@ import artistPhoto from '../assets/Bushra.jpg';
 const PERFORMANCE_CONFIG = {
   THROTTLE_MS: 120,
   PARTICLE_COUNT: {
-    DESKTOP: 60,
-    TABLET: 40,
-    MOBILE: 20,
+    DESKTOP: 50,
+    TABLET: 30,
+    MOBILE: 15,
   },
   ANIMATION_DURATIONS: {
     FAST: 0.3,
@@ -43,9 +42,6 @@ const BREAKPOINTS = {
 
 /**
  * Throttle function for performance optimization
- * @param {Function} fn - Function to throttle
- * @param {number} wait - Wait time in milliseconds
- * @returns {Function} Throttled function
  */
 const throttle = (fn, wait = PERFORMANCE_CONFIG.THROTTLE_MS) => {
   let last = 0;
@@ -60,9 +56,6 @@ const throttle = (fn, wait = PERFORMANCE_CONFIG.THROTTLE_MS) => {
 
 /**
  * Debounce function for performance optimization
- * @param {Function} fn - Function to debounce
- * @param {number} delay - Delay in milliseconds
- * @returns {Function} Debounced function
  */
 const debounce = (fn, delay) => {
   let timeoutId;
@@ -74,8 +67,6 @@ const debounce = (fn, delay) => {
 
 /**
  * Get device type based on window width
- * @param {number} width - Window width
- * @returns {string} Device type
  */
 const getDeviceType = (width) => {
   if (width < BREAKPOINTS.SM) return 'mobile';
@@ -89,7 +80,6 @@ const getDeviceType = (width) => {
 
 /**
  * Hook for responsive design and device detection
- * @returns {Object} Device and responsive state
  */
 const useResponsive = () => {
   const [state, setState] = useState({
@@ -116,7 +106,7 @@ const useResponsive = () => {
         isDesktop: deviceType === 'desktop',
       });
 
-      // Update CSS custom properties for responsive design
+      // Update CSS custom properties
       document.documentElement.style.setProperty('--vh', `${height * 0.01}px`);
       document.documentElement.style.setProperty('--vw', `${width * 0.01}px`);
     };
@@ -137,9 +127,7 @@ const useResponsive = () => {
 };
 
 /**
- * Hook for intersection observer with enhanced options
- * @param {Object} options - Intersection observer options
- * @returns {Object} Ref and intersection state
+ * Enhanced intersection observer hook
  */
 const useIntersectionObserver = (options = {}) => {
   const ref = useRef(null);
@@ -178,7 +166,7 @@ const useIntersectionObserver = (options = {}) => {
 // ========================================================================================
 
 /**
- * Enhanced Floating Particles Component
+ * Floating Particles Background Component
  */
 const FloatingParticles = ({ disabled, deviceType }) => {
   const canvasRef = useRef(null);
@@ -200,14 +188,13 @@ const FloatingParticles = ({ disabled, deviceType }) => {
       particlesRef.current.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 3 + 1,
-        originalSize: Math.random() * 3 + 1,
-        alpha: Math.random() * 0.8 + 0.2,
-        hue: Math.random() * 60 + 200,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 0.5,
+        originalSize: Math.random() * 2 + 0.5,
+        alpha: Math.random() * 0.6 + 0.2,
+        hue: Math.random() * 360,
         pulsePhase: Math.random() * Math.PI * 2,
-        magnetism: Math.random() * 0.4 + 0.1,
       });
     }
   }, [particleCount, disabled]);
@@ -235,21 +222,21 @@ const FloatingParticles = ({ disabled, deviceType }) => {
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particlesRef.current.forEach((particle, index) => {
+      particlesRef.current.forEach((particle) => {
         // Mouse interaction
         const dx = mouseRef.current.x - particle.x;
         const dy = mouseRef.current.y - particle.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < 120) {
-          const force = (120 - distance) * 0.00012;
-          particle.vx += (dx / (distance || 1)) * force * particle.magnetism;
-          particle.vy += (dy / (distance || 1)) * force * particle.magnetism;
+        if (distance < 100) {
+          const force = (100 - distance) * 0.0001;
+          particle.vx += (dx / (distance || 1)) * force;
+          particle.vy += (dy / (distance || 1)) * force;
         }
 
-        // Apply friction and movement
-        particle.vx *= 0.999;
-        particle.vy *= 0.999;
+        // Apply movement with gentle friction
+        particle.vx *= 0.998;
+        particle.vy *= 0.998;
         particle.x += particle.vx;
         particle.y += particle.vy;
 
@@ -259,43 +246,26 @@ const FloatingParticles = ({ disabled, deviceType }) => {
         if (particle.y < -20) particle.y = canvas.height + 20;
         if (particle.y > canvas.height + 20) particle.y = -20;
 
-        // Pulsing effect
-        particle.pulsePhase += 0.015;
-        const pulse = Math.sin(particle.pulsePhase) * 0.4 + 0.6;
+        // Gentle pulsing
+        particle.pulsePhase += 0.01;
+        const pulse = Math.sin(particle.pulsePhase) * 0.3 + 0.7;
         particle.size = particle.originalSize * pulse;
 
-        // Render particle with glow
-        const alpha = particle.alpha * (0.7 + pulse * 0.3);
+        // Render with soft glow
+        const alpha = particle.alpha * (0.6 + pulse * 0.4);
         const gradient = ctx.createRadialGradient(
           particle.x, particle.y, 0,
-          particle.x, particle.y, particle.size * 8
+          particle.x, particle.y, particle.size * 6
         );
 
-        gradient.addColorStop(0, `hsla(${particle.hue}, 80%, 60%, ${alpha})`);
-        gradient.addColorStop(0.3, `hsla(${particle.hue}, 80%, 50%, ${alpha * 0.6})`);
+        gradient.addColorStop(0, `hsla(${particle.hue}, 70%, 60%, ${alpha})`);
+        gradient.addColorStop(0.5, `hsla(${particle.hue}, 70%, 50%, ${alpha * 0.4})`);
         gradient.addColorStop(1, 'transparent');
 
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size * 8, 0, Math.PI * 2);
+        ctx.arc(particle.x, particle.y, particle.size * 6, 0, Math.PI * 2);
         ctx.fill();
-
-        // Connection lines between nearby particles
-        particlesRef.current.slice(index + 1).forEach((otherParticle) => {
-          const dx2 = particle.x - otherParticle.x;
-          const dy2 = particle.y - otherParticle.y;
-          const dist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-
-          if (dist < 80) {
-            const opacity = Math.max(0, (1 - dist / 80) * 0.2);
-            ctx.strokeStyle = `hsla(${(particle.hue + otherParticle.hue) / 2}, 70%, 60%, ${opacity})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.stroke();
-          }
-        });
       });
 
       animationIdRef.current = requestAnimationFrame(animate);
@@ -322,7 +292,7 @@ const FloatingParticles = ({ disabled, deviceType }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none opacity-60"
+      className="fixed inset-0 pointer-events-none opacity-40"
       style={{ zIndex: 1 }}
       aria-hidden="true"
     />
@@ -330,7 +300,7 @@ const FloatingParticles = ({ disabled, deviceType }) => {
 };
 
 /**
- * Enhanced Scroll Progress Indicator
+ * Scroll Progress Indicator
  */
 const ScrollProgress = () => {
   const { scrollYProgress } = useScroll();
@@ -339,7 +309,7 @@ const ScrollProgress = () => {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 transform-gpu z-50 origin-left"
+      className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-rose-500 to-violet-500 transform-gpu z-50 origin-left"
       style={{ scaleX, opacity }}
       aria-hidden="true"
     />
@@ -347,101 +317,78 @@ const ScrollProgress = () => {
 };
 
 /**
- * Enhanced Background Elements
+ * Background Elements with Art-inspired Gradients
  */
 const BackgroundElements = ({ reducedMotion, deviceType }) => {
   const isMobile = deviceType === 'mobile';
   
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-      {/* Animated gradient orbs */}
+      {/* Artistic gradient orbs inspired by paint mixing */}
       <motion.div
-        className="absolute top-1/4 left-1/4 w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-purple-600/30 via-blue-600/20 to-transparent rounded-full blur-3xl"
+        className="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-gradient-to-br from-amber-600/20 via-rose-600/15 to-transparent rounded-full blur-3xl"
         animate={reducedMotion ? {} : {
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
-          x: [0, isMobile ? 20 : 60, 0],
-          y: [0, isMobile ? -15 : -40, 0],
+          scale: [1, 1.2, 1],
+          opacity: [0.15, 0.3, 0.15],
+          x: [0, isMobile ? 30 : 80, 0],
+          y: [0, isMobile ? -20 : -60, 0],
         }}
         transition={{
-          duration: isMobile ? 6 : 8,
+          duration: isMobile ? 8 : 12,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
       />
 
       <motion.div
-        className="absolute bottom-1/3 right-1/4 w-64 h-64 md:w-80 md:h-80 bg-gradient-to-br from-cyan-600/25 via-blue-600/20 to-transparent rounded-full blur-3xl"
+        className="absolute bottom-1/3 right-1/4 w-48 h-48 md:w-80 md:h-80 bg-gradient-to-br from-violet-600/20 via-blue-600/15 to-transparent rounded-full blur-3xl"
         animate={reducedMotion ? {} : {
-          scale: [1.2, 1, 1.2],
-          opacity: [0.3, 0.5, 0.3],
-          x: [0, isMobile ? -20 : -50, 0],
-          y: [0, isMobile ? 20 : 50, 0],
+          scale: [1.1, 0.9, 1.1],
+          opacity: [0.2, 0.35, 0.2],
+          x: [0, isMobile ? -30 : -70, 0],
+          y: [0, isMobile ? 30 : 80, 0],
         }}
         transition={{
-          duration: isMobile ? 8 : 10,
+          duration: isMobile ? 10 : 15,
           repeat: Infinity,
           ease: 'easeInOut',
-          delay: 2,
+          delay: 3,
         }}
       />
 
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
+      {/* Subtle texture overlay */}
+      <div className="absolute inset-0 opacity-[0.02]">
         <div
           className="w-full h-full"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 25% 25%, white 1px, transparent 1px),
-              radial-gradient(circle at 75% 75%, white 1px, transparent 1px)
+              radial-gradient(circle at 30% 40%, rgba(245, 158, 11, 0.1) 1px, transparent 1px),
+              radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.1) 1px, transparent 1px)
             `,
-            backgroundSize: `${isMobile ? '40px 40px' : '60px 60px'}, ${isMobile ? '40px 40px' : '60px 60px'}`,
-            backgroundPosition: '0 0, 20px 20px',
+            backgroundSize: `${isMobile ? '50px 50px' : '80px 80px'}, ${isMobile ? '50px 50px' : '80px 80px'}`,
+            backgroundPosition: '0 0, 25px 25px',
           }}
         />
       </div>
-
-      {/* Floating sparkles */}
-      {!isMobile && [...Array(reducedMotion ? 3 : 8)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-white/30 rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={reducedMotion ? {} : {
-            y: [0, -80, 0],
-            opacity: [0.1, 0.6, 0.1],
-            scale: [1, 1.8, 1],
-          }}
-          transition={{
-            duration: 4 + Math.random() * 3,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
     </div>
   );
 };
 
 /**
- * Enhanced Section Wrapper with improved animations
+ * Section Wrapper with Intersection Observer
  */
 const Section = ({ children, className = '', delay = 0, id }) => {
   const { ref, hasIntersected } = useIntersectionObserver({
     threshold: 0.1,
-    rootMargin: '-80px 0px',
+    rootMargin: '-60px 0px',
   });
 
   return (
     <motion.section
       id={id}
       ref={ref}
-      initial={{ opacity: 0, y: 80 }}
-      animate={hasIntersected ? { opacity: 1, y: 0 } : { opacity: 0, y: 80 }}
+      initial={{ opacity: 0, y: 60 }}
+      animate={hasIntersected ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
       transition={{
         duration: 0.8,
         delay,
@@ -449,7 +396,6 @@ const Section = ({ children, className = '', delay = 0, id }) => {
       }}
       className={`relative ${className}`}
       role="region"
-      aria-labelledby={id ? `${id}-heading` : undefined}
     >
       {children}
     </motion.section>
@@ -457,23 +403,28 @@ const Section = ({ children, className = '', delay = 0, id }) => {
 };
 
 /**
- * Enhanced Gradient Text Component
+ * Gradient Text Component
  */
-const GradientText = ({ children, className = '', gradient = 'from-white via-purple-200 to-blue-200', as: Component = 'span' }) => (
+const GradientText = ({ 
+  children, 
+  className = '', 
+  gradient = 'from-white via-amber-100 to-rose-100', 
+  as: Component = 'span' 
+}) => (
   <Component className={`bg-gradient-to-r ${gradient} bg-clip-text text-transparent ${className}`}>
     {children}
   </Component>
 );
 
 /**
- * Enhanced Artist Section with improved responsiveness
+ * Enhanced Artist Portrait Section
  */
 const ArtistSection = ({ isMobile, reducedMotion }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <Section className="flex justify-center mb-20 md:mb-32 pt-12 md:pt-20" id="artist">
+    <Section className="flex justify-center mb-16 md:mb-24 pt-8 md:pt-16" id="artist">
       <motion.div
         className="relative group cursor-pointer"
         onMouseEnter={() => !isMobile && setIsHovered(true)}
@@ -483,14 +434,12 @@ const ArtistSection = ({ isMobile, reducedMotion }) => {
         whileHover={!isMobile && !reducedMotion ? { scale: 1.02 } : {}}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.4 }}
-        role="img"
-        aria-label="Interactive artist portrait with animated rings"
       >
-        {/* Outer rotating ring */}
+        {/* Rotating art-inspired rings */}
         <motion.div
-          className="absolute -inset-8 md:-inset-12 rounded-full opacity-50"
+          className="absolute -inset-6 md:-inset-10 rounded-full opacity-40"
           style={{
-            background: 'conic-gradient(from 0deg, #8b5cf6, #06b6d4, #d946ef, #f59e0b, #8b5cf6)',
+            background: 'conic-gradient(from 0deg, #f59e0b, #ef4444, #8b5cf6, #06b6d4, #f59e0b)',
             filter: 'blur(2px)',
           }}
           animate={reducedMotion ? {} : {
@@ -499,116 +448,87 @@ const ArtistSection = ({ isMobile, reducedMotion }) => {
           }}
           transition={{
             rotate: {
-              duration: 8,
+              duration: 10,
               ease: 'linear',
               repeat: Infinity,
             },
             scale: {
-              duration: 0.4,
+              duration: 0.5,
             },
           }}
         />
 
-        {/* Inner counter-rotating ring */}
         <motion.div
-          className="absolute -inset-4 md:-inset-8 rounded-full opacity-35"
+          className="absolute -inset-3 md:-inset-6 rounded-full opacity-30"
           style={{
-            background: 'conic-gradient(from 180deg, #06b6d4, #8b5cf6, #06b6d4)',
+            background: 'conic-gradient(from 180deg, #ec4899, #8b5cf6, #06b6d4, #ec4899)',
             filter: 'blur(1px)',
           }}
           animate={reducedMotion ? {} : {
             rotate: isHovered ? -360 : -180,
-            scale: isHovered ? 0.9 : 1,
+            scale: isHovered ? 0.95 : 1,
           }}
           transition={{
             rotate: {
-              duration: 12,
+              duration: 15,
               ease: 'linear',
               repeat: Infinity,
             },
             scale: {
-              duration: 0.4,
+              duration: 0.5,
             },
           }}
         />
 
-        {/* Main portrait container */}
-        <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full overflow-hidden backdrop-blur-2xl bg-white/10 border border-white/20 shadow-[0_0_60px_rgba(139,92,246,0.3)]">
+        {/* Main portrait */}
+        <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-72 lg:h-72 rounded-full overflow-hidden backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
           <div className="absolute inset-2 md:inset-3 rounded-full overflow-hidden">
             <motion.img
               src={artistPhoto}
-              alt="Bushra Khandoker — Digital artist and creative visionary from Bangladesh"
+              alt="Bushra Khandoker — Multidisciplinary visual artist from Bangladesh"
               className="w-full h-full object-cover object-center rounded-full"
               whileHover={!isMobile && !reducedMotion ? { scale: 1.1 } : {}}
               transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
               loading="eager"
               onLoad={() => setIsLoaded(true)}
               style={{
-                filter: isLoaded ? 'none' : 'blur(20px)',
-                transition: 'filter 0.3s ease-in-out',
+                filter: isLoaded ? 'none' : 'blur(10px)',
+                transition: 'filter 0.3s ease',
               }}
             />
             
-            {/* Image overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent rounded-full" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-full" />
             
-            {/* Loading placeholder */}
             {!isLoaded && (
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-blue-600/20 animate-pulse rounded-full" />
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-violet-500/20 animate-pulse rounded-full" />
             )}
           </div>
         </div>
 
-        {/* Floating accent elements */}
+        {/* Floating art tools */}
         {[
-          {
-            delay: 0,
-            color: 'from-purple-400 to-pink-500',
-            position: '-top-4 -right-4 md:-top-6 md:-right-6',
-            size: 'w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5',
-          },
-          {
-            delay: 1.5,
-            color: 'from-blue-400 to-cyan-500',
-            position: '-bottom-2 -left-2 md:-bottom-4 md:-left-4',
-            size: 'w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5',
-          },
-          {
-            delay: 3,
-            color: 'from-amber-400 to-rose-500',
-            position: 'top-8 -left-6 md:top-12 md:-left-8',
-            size: 'w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4',
-          },
-          {
-            delay: 4.5,
-            color: 'from-emerald-400 to-blue-500',
-            position: 'bottom-12 -right-1 md:bottom-16 md:-right-2',
-            size: 'w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4',
-          },
+          { tool: '🎨', delay: 0, position: '-top-3 -right-3 md:-top-4 md:-right-4' },
+          { tool: '✏️', delay: 2, position: '-bottom-2 -left-2 md:-bottom-3 md:-left-3' },
+          { tool: '🖌️', delay: 4, position: 'top-6 -left-4 md:top-8 md:-left-6' },
+          { tool: '⚡', delay: 6, position: 'bottom-8 -right-1 md:bottom-12 md:-right-2' },
         ].map((item, index) => (
           <motion.div
             key={index}
-            className={`absolute ${item.size} bg-gradient-to-br ${item.color} rounded-full shadow-lg ${item.position}`}
+            className={`absolute text-lg md:text-2xl ${item.position}`}
             animate={reducedMotion ? {} : {
-              y: [0, isMobile ? -10 : -20, 0],
-              x: [0, Math.sin(item.delay) * (isMobile ? 5 : 10), 0],
-              scale: [1, isMobile ? 1.2 : 1.3, 1],
-              rotate: [0, 360, 0],
+              y: [0, -15, 0],
+              rotate: [0, 15, -15, 0],
+              scale: [1, 1.2, 1],
             }}
             transition={{
-              duration: isMobile ? 4 : 6,
+              duration: 6,
               repeat: Infinity,
               ease: 'easeInOut',
               delay: item.delay,
             }}
-            style={{
-              filter: `drop-shadow(0 0 ${isMobile ? 6 : 10}px ${
-                item.color.includes('purple') ? '#8b5cf666' :
-                item.color.includes('blue') ? '#3b82f666' :
-                item.color.includes('amber') ? '#f59e0b66' : '#10b98166'
-              })`,
-            }}
-          />
+          >
+            {item.tool}
+          </motion.div>
         ))}
       </motion.div>
     </Section>
@@ -616,35 +536,29 @@ const ArtistSection = ({ isMobile, reducedMotion }) => {
 };
 
 /**
- * Enhanced Hero Section with improved typography and animations
+ * Hero Section with Artist Information
  */
 const HeroSection = ({ name = 'Bushra', deviceType }) => {
   const [displayedText, setDisplayedText] = useState('');
-  const fullText = 'Digital Artist & Creative Visionary';
+  const tagline = 'Digital artist & maker — sketches, acrylic, watercolor, 3D modeling, digital art, and sculpture. I turn imagined worlds into tangible experiences.';
   const isMobile = deviceType === 'mobile';
 
   useEffect(() => {
     let index = 0;
     const timer = setInterval(() => {
-      if (index < fullText.length) {
-        setDisplayedText(fullText.slice(0, index + 1));
+      if (index < tagline.length) {
+        setDisplayedText(tagline.slice(0, index + 1));
         index++;
       } else {
         clearInterval(timer);
       }
-    }, isMobile ? 60 : 80);
+    }, isMobile ? 30 : 40);
 
     return () => clearInterval(timer);
-  }, [fullText, isMobile]);
-
-  const titleSizes = {
-    mobile: 'text-4xl sm:text-5xl',
-    tablet: 'text-5xl md:text-6xl',
-    desktop: 'text-6xl lg:text-7xl xl:text-8xl',
-  };
+  }, [tagline, isMobile]);
 
   return (
-    <Section className="mb-24 md:mb-40 px-4 sm:px-6" id="hero">
+    <Section className="mb-20 md:mb-32 px-4 sm:px-6" id="hero">
       <div className="max-w-6xl mx-auto text-center">
         <motion.header
           initial={{ opacity: 0, y: 30 }}
@@ -652,28 +566,24 @@ const HeroSection = ({ name = 'Bushra', deviceType }) => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="mb-8 md:mb-12"
         >
-          <h1 
-            className={`${titleSizes[deviceType]} font-bold tracking-tight leading-tight mb-6 md:mb-8`}
-            id="hero-heading"
-          >
+          <h1 className="text-xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-tight mb-6 md:mb-8">
             <GradientText 
-              as="span" 
-              className=" mb-2 md:mb-4"
-              gradient="from-white via-purple-100 to-blue-100"
+             
+             
+              gradient="from-white via-amber-100 to-rose-100"
             >
               Hello, I'm
             </GradientText>
             <GradientText 
-              as="span"
-              gradient="from-purple-400 via-blue-400 to-cyan-400" 
-           
+             
+              gradient="from-amber-400 via-rose-400 to-violet-400"
             >
               {name}
             </GradientText>
           </h1>
 
           <motion.div 
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-300 font-light mb-6 md:mb-8 min-h-[2.5rem] md:min-h-[3rem]"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 font-light mb-8 md:mb-12 max-w-4xl mx-auto leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
@@ -681,33 +591,29 @@ const HeroSection = ({ name = 'Bushra', deviceType }) => {
             <span className="relative inline-block">
               {displayedText}
               <motion.span 
-                className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent"
-                initial={{ scaleX: 0, opacity: 0 }}
-                animate={{ scaleX: 1, opacity: 0.8 }}
-                transition={{ delay: 1.2, duration: 1.5 }}
+                className="absolute top-0 -right-1 w-0.5 h-full bg-amber-400"
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
               />
             </span>
           </motion.div>
         </motion.header>
 
         <motion.div 
-          className="max-w-4xl mx-auto"
+          className="max-w-5xl mx-auto"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
         >
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed text-gray-300 font-light">
-            As a passionate digital artist from Bangladesh, I blend{' '}
+          <p className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-200 font-light">
+            I am Bushra Khandoker, a multidisciplinary visual artist from Bangladesh. I work across sketching, acrylic and watercolor painting, 3D modeling, digital composition, and sculpture — always with one goal: to translate inner imagination into real, touchable form. My practice blends{' '}
             <GradientText 
-              gradient="from-purple-400 to-blue-400" 
-              className="font-medium relative inline-block group"
+              gradient="from-amber-400 to-rose-400" 
+              className="font-medium"
             >
-              technology and nature
-              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-            </GradientText>{' '}
-            to create thought-provoking, abstract works of art. My journey began with a love for color, 
-            geometry, and the countless possibilities that modern tools unlock. Each piece is a 
-            conversation — a study of harmony, contrast, and human emotion.
+              hands-on craft with computational processes
+            </GradientText>
+            , exploring color, geometry, and texture to create pieces that invite curiosity and emotional connection. Each work is a prototype of a thought — designed to be seen, felt, and experienced.
           </p>
         </motion.div>
       </div>
@@ -716,63 +622,48 @@ const HeroSection = ({ name = 'Bushra', deviceType }) => {
 };
 
 /**
- * Enhanced Philosophy Section with better layout and interactions
+ * Artist Philosophy Section
  */
 const PhilosophySection = ({ reducedMotion, isMobile }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { ref, hasIntersected } = useIntersectionObserver();
 
+  const statement = `My work sits at the meeting point of observation and invention. I begin with simple marks — a pencil line or a quick watercolor study — and follow the idea through layers of material and method until it becomes a finished object: a painting, a rendered scene, or a small sculptural form. I use traditional techniques (sketch, acrylic, watercolor) alongside digital tools and 3D modeling to push ideas between the physical and the virtual.
+
+The central aim of my practice is transformation: to make internal landscapes visible and to test how imagination behaves when given material constraints. I'm interested in how color systems, geometric rhythm, and textural contrast can be composed to produce emotional weight and narrative ambiguity. At times the work is intimate — small drawings or tactile sculptures — and at times it expands into immersive, screen-based pieces that invite longer attention.
+
+Looking forward, I'm exploring hybrid work that fuses algorithmic processes with handmade techniques — for example, using generative patterns as a scaffold for hand-painted surfaces, or translating 3D prints into painted and cast sculptures. I work experimentally: prototypes, rapid iterations, and collaborations are part of my process. My practice is driven by the conviction that imagination should be given form — not only to be seen, but to be touched, questioned, and shared.`;
+
   return (
-    <Section className="mb-24 md:mb-40 px-4 sm:px-6" delay={0.2} id="philosophy">
+    <Section className="mb-20 md:mb-32 px-4 sm:px-6" delay={0.2} id="philosophy">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           ref={ref}
-          className="relative overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-2xl bg-gradient-to-br from-white/10 via-white/5 to-white/10 border border-white/20 shadow-[0_20px_80px_-15px_rgba(139,92,246,0.4)]"
+          className="relative overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/8 via-white/4 to-white/8 border border-white/20"
           onMouseEnter={() => !isMobile && setIsHovered(true)}
           onMouseLeave={() => !isMobile && setIsHovered(false)}
-          whileHover={!reducedMotion ? { scale: 1.01 } : {}}
-          transition={{ duration: 0.4 }}
+          whileHover={!reducedMotion ? { y: -5 } : {}}
+          transition={{ duration: 0.3 }}
         >
           <div className="relative z-10 p-6 sm:p-8 md:p-12 lg:p-16">
-            <h2 
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-center mb-12 md:mb-16"
-              id="philosophy-heading"
-            >
-              <GradientText gradient="from-purple-300 via-pink-300 to-blue-300">
-                Artistic Philosophy
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 md:mb-12">
+              <GradientText gradient="from-amber-300 via-rose-300 to-violet-300">
+                Artist Statement
               </GradientText>
             </h2>
 
-            <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
               <motion.div 
-                className="space-y-6 md:space-y-8"
+                className="lg:col-span-2 space-y-6 md:space-y-8"
                 initial={{ opacity: 0, x: -30 }}
                 animate={hasIntersected ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
                 transition={{ duration: 0.8 }}
               >
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed text-gray-200">
-                  My artistic philosophy is rooted in the exploration of{' '}
-                  <GradientText 
-                    gradient="from-purple-300 to-pink-300" 
-                    className="font-medium"
-                  >
-                    contrast and harmony
-                  </GradientText>
-                  . Through digital manipulation I aim to bring life to abstract ideas, combining 
-                  bold strokes with softer gradients to create visual tension and serenity at once.
-                </p>
-
-                <p className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed text-gray-300">
-                  Each piece invites the viewer into a world where abstraction meets reality — a 
-                  transformative visual experience that encourages curiosity and reflection.
-                </p>
-
-                <motion.div 
-                  className="w-16 md:w-24 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={hasIntersected ? { width: isMobile ? 64 : 96 } : { width: 0 }}
-                  transition={{ delay: 0.6, duration: 1 }}
-                />
+                {statement.split('\n\n').map((paragraph, index) => (
+                  <p key={index} className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-200 first-letter:text-2xl first-letter:font-bold first-letter:text-amber-400 first-letter:float-left first-letter:mr-2 first-letter:mt-1">
+                    {paragraph}
+                  </p>
+                ))}
               </motion.div>
 
               <motion.div 
@@ -781,52 +672,57 @@ const PhilosophySection = ({ reducedMotion, isMobile }) => {
                 animate={hasIntersected ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
-                <div className="aspect-square max-w-xs md:max-w-sm mx-auto rounded-2xl md:rounded-3xl bg-gradient-to-br from-purple-600/20 via-blue-600/20 to-pink-600/20 backdrop-blur-sm border border-white/10 flex items-center justify-center relative overflow-hidden">
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-amber-600/15 via-rose-600/15 to-violet-600/15 backdrop-blur-sm border border-white/10 flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
                   <motion.div 
-                    className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl"
+                    className="text-4xl md:text-5xl mb-4"
                     animate={reducedMotion ? {} : {
-                      rotate: isHovered ? [0, 10, -10, 0] : [0, 2, -2, 0],
-                      scale: isHovered ? [1, 1.1, 1] : [1, 1.02, 1],
+                      rotate: isHovered ? [0, 5, -5, 0] : 0,
+                      scale: isHovered ? [1, 1.1, 1] : 1,
                     }}
-                    transition={{
-                      duration: isHovered ? 4 : 8,
-                      ease: 'easeInOut',
-                      repeat: Infinity,
-                    }}
+                    transition={{ duration: 2, ease: 'easeInOut' }}
                   >
-                    🎨
+                    🎭
                   </motion.div>
+                  
+                  <h3 className="text-lg md:text-xl font-semibold mb-2">
+                    <GradientText gradient="from-amber-300 to-rose-300">
+                      Creative Process
+                    </GradientText>
+                  </h3>
+                  
+                  <p className="text-sm text-gray-300">
+                    From sketch to sculpture, each medium informs the next
+                  </p>
 
-                  {/* Floating decorative elements */}
-                  {!reducedMotion && [...Array(5)].map((_, i) => (
-                    <motion.div 
+                  {/* Floating elements */}
+                  {!reducedMotion && ['🖊️', '🎨', '💻', '🏺'].map((tool, i) => (
+                    <motion.div
                       key={i}
-                      className="absolute w-1.5 h-1.5 md:w-2 md:h-2 bg-white/30 rounded-full"
+                      className="absolute text-lg opacity-30"
                       style={{
-                        left: `${20 + Math.random() * 60}%`,
-                        top: `${20 + Math.random() * 60}%`,
+                        left: `${20 + (i * 20)}%`,
+                        top: `${15 + (i % 2) * 70}%`,
                       }}
                       animate={{
-                        y: [0, -15, 0],
-                        x: [0, Math.sin(i) * 8, 0],
-                        opacity: [0.2, 0.6, 0.2],
+                        y: [0, -10, 0],
+                        rotate: [0, 5, -5, 0],
                       }}
                       transition={{
-                        duration: 3 + Math.random() * 2,
+                        duration: 3 + i,
                         repeat: Infinity,
-                        delay: Math.random() * 2,
-                        ease: 'easeInOut',
+                        delay: i * 0.5,
                       }}
-                    />
+                    >
+                      {tool}
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
             </div>
           </div>
 
-          {/* Hover effect overlay */}
           <motion.div 
-            className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-pink-500/10"
+            className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-rose-500/5 to-violet-500/5"
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.4 }}
@@ -838,33 +734,33 @@ const PhilosophySection = ({ reducedMotion, isMobile }) => {
 };
 
 /**
- * Enhanced Inspirations Section with improved card design
+ * Creative Mediums Section
  */
-const InspirationsSection = ({ reducedMotion, deviceType }) => {
+const MediumsSection = ({ reducedMotion, deviceType }) => {
   const isMobile = deviceType === 'mobile';
   const { ref, hasIntersected } = useIntersectionObserver();
 
-  const inspirations = [
+  const mediums = [
     {
-      title: "Nature's Patterns",
-      description: "Organic forms and natural algorithms inspire my digital compositions, bringing balance and mathematical beauty to each piece.",
-      icon: '🌿',
-      gradient: 'from-emerald-400 via-green-400 to-teal-400',
-      bgGradient: 'from-emerald-600/20 to-green-600/20',
-      iconBg: 'from-emerald-500/20 to-green-500/20',
+      title: "Traditional Arts",
+      description: "Sketching, acrylic painting, and watercolor — the foundation of my visual language and tactile exploration.",
+      icon: '🎨',
+      gradient: 'from-amber-400 via-orange-400 to-red-400',
+      bgGradient: 'from-amber-600/20 to-orange-600/20',
+      iconBg: 'from-amber-500/20 to-orange-500/20',
     },
     {
-      title: 'Digital Innovation',
-      description: 'Emerging tools and experimentation let me push beyond traditional artistic boundaries, mixing code-driven forms with hand-crafted gestures.',
-      icon: '⚡',
-      gradient: 'from-blue-400 via-cyan-400 to-sky-400',
+      title: 'Digital Creation',
+      description: 'Digital composition and 3D modeling that extends physical possibilities into virtual realms.',
+      icon: '💻',
+      gradient: 'from-blue-400 via-cyan-400 to-teal-400',
       bgGradient: 'from-blue-600/20 to-cyan-600/20',
       iconBg: 'from-blue-500/20 to-cyan-500/20',
     },
     {
-      title: 'Human Connection',
-      description: 'I aim to translate universal emotions into visual narratives that connect across cultures and time.',
-      icon: '💫',
+      title: 'Sculptural Form',
+      description: 'Three-dimensional works that bring digital concepts into tangible, touchable reality.',
+      icon: '🏺',
       gradient: 'from-purple-400 via-pink-400 to-rose-400',
       bgGradient: 'from-purple-600/20 to-pink-600/20',
       iconBg: 'from-purple-500/20 to-pink-500/20',
@@ -872,29 +768,25 @@ const InspirationsSection = ({ reducedMotion, deviceType }) => {
   ];
 
   return (
-    <Section className="mb-24 md:mb-40 px-4 sm:px-6" delay={0.4} id="inspirations">
+    <Section className="mb-20 md:mb-32 px-4 sm:px-6" delay={0.4} id="mediums">
       <div className="max-w-7xl mx-auto" ref={ref}>
-        <h2 
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-center mb-12 md:mb-20"
-          id="inspirations-heading"
-        >
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-12 md:mb-20">
           <GradientText gradient="from-blue-300 via-purple-300 to-pink-300">
-            Creative Inspirations
+            Creative Mediums
           </GradientText>
         </h2>
 
         <div className="grid md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
-          {inspirations.map((inspiration, index) => (
+          {mediums.map((medium, index) => (
             <motion.article 
               key={index}
-              className="group relative overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 p-6 sm:p-8 md:p-10 lg:p-12 cursor-pointer"
+              className="group relative overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/8 to-white/4 border border-white/20 p-6 sm:p-8 md:p-10 cursor-pointer"
               initial={{ opacity: 0, y: 50 }}
               animate={hasIntersected ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               whileHover={!reducedMotion ? { 
-                y: -10, 
+                y: -8, 
                 scale: 1.02,
-                boxShadow: '0 25px 50px -15px rgba(139,92,246,0.4)',
               } : {}}
               whileTap={{ scale: 0.98 }}
             >
@@ -902,29 +794,27 @@ const InspirationsSection = ({ reducedMotion, deviceType }) => {
                 <motion.div 
                   className="relative inline-block mb-6 md:mb-8"
                   whileHover={!reducedMotion ? { 
-                    rotate: [0, -10, 10, 0], 
+                    rotate: [0, -8, 8, 0], 
                     scale: [1, 1.2, 1] 
                   } : {}}
                   transition={{ duration: 0.6 }}
                 >
-                  <div className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl relative z-10`}>
-                    {inspiration.icon}
+                  <div className="text-4xl sm:text-5xl md:text-6xl relative z-10">
+                    {medium.icon}
                   </div>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${inspiration.iconBg} opacity-40 blur-xl scale-150 -z-10`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${medium.iconBg} opacity-40 blur-xl scale-150 -z-10`} />
                 </motion.div>
 
-                <h3 
-                  className={`text-lg sm:text-xl md:text-2xl font-bold mb-4 md:mb-6 bg-gradient-to-r ${inspiration.gradient} bg-clip-text text-transparent`}
-                >
-                  {inspiration.title}
+                <h3 className={`text-lg sm:text-xl md:text-2xl font-bold mb-4 md:mb-6 bg-gradient-to-r ${medium.gradient} bg-clip-text text-transparent`}>
+                  {medium.title}
                 </h3>
                 
-                <p className="text-gray-300 leading-relaxed text-sm sm:text-base md:text-base mb-4 md:mb-6">
-                  {inspiration.description}
+                <p className="text-gray-300 leading-relaxed text-sm sm:text-base mb-4 md:mb-6">
+                  {medium.description}
                 </p>
 
                 <motion.div 
-                  className={`w-12 md:w-16 h-1 mx-auto bg-gradient-to-r ${inspiration.gradient} rounded-full`}
+                  className={`w-12 md:w-16 h-1 mx-auto bg-gradient-to-r ${medium.gradient} rounded-full`}
                   initial={{ width: 0, opacity: 0 }}
                   animate={hasIntersected ? { 
                     width: isMobile ? 48 : 64, 
@@ -934,12 +824,10 @@ const InspirationsSection = ({ reducedMotion, deviceType }) => {
                 />
               </div>
 
-              {/* Hover effect overlay */}
               <motion.div 
-                className={`absolute inset-0 bg-gradient-to-br ${inspiration.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                className={`absolute inset-0 bg-gradient-to-br ${medium.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
               />
 
-              {/* Decorative corner elements */}
               <div className="absolute top-4 md:top-6 right-4 md:right-6 w-6 md:w-8 h-6 md:h-8 border border-white/10 rounded-full" />
               <div className="absolute bottom-4 md:bottom-6 left-4 md:left-6 w-4 md:w-6 h-4 md:h-6 border border-white/10 rounded-full" />
             </motion.article>
@@ -950,45 +838,30 @@ const InspirationsSection = ({ reducedMotion, deviceType }) => {
   );
 };
 
-
-
 // ========================================================================================
-// MAIN COMPONENT
+// MAIN COMPONENT WITH SEO
 // ========================================================================================
 
 /**
- * Enhanced AboutMe Page Component
- * 
- * Features:
- * - Comprehensive SEO optimization with structured data
- * - Full responsive design with mobile-first approach
- * - Performance optimizations for all device types
- * - Enhanced accessibility with proper ARIA labels
- * - Reduced motion support for user preferences
- * - Progressive loading and error handling
- * - Comprehensive documentation
+ * Main Portfolio Component with Enhanced SEO and Accessibility
  */
-const AboutMe = () => {
+const BushraPortfolio = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
   const responsive = useResponsive();
   const prefersReducedMotion = useReducedMotion();
 
-  // Enhanced mounting and initialization
   useEffect(() => {
     let mounted = true;
 
-    // Initialize page styles and behaviors
     const initializePage = async () => {
       try {
-        // Set initial body styles for smooth scrolling
         document.body.style.overflowX = 'hidden';
         document.body.style.overflowY = 'auto';
         document.documentElement.style.scrollBehavior = 'smooth';
 
-        // Simulate loading progress for smoother UX
-        const progressSteps = [20, 40, 60, 80, 100];
+        const progressSteps = [25, 50, 75, 100];
         for (const step of progressSteps) {
           if (!mounted) return;
           setLoadingProgress(step);
@@ -1001,7 +874,7 @@ const AboutMe = () => {
       } catch (error) {
         console.error('Page initialization error:', error);
         if (mounted) {
-          setIsMounted(true); // Failsafe to show content
+          setIsMounted(true);
         }
       }
     };
@@ -1014,12 +887,11 @@ const AboutMe = () => {
     };
   }, []);
 
-  // Loading screen with progress indicator
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center">
         <motion.div 
-          className="w-16 h-16 md:w-20 md:h-20 border-4 border-purple-500/30 border-t-purple-500 rounded-full mb-6"
+          className="w-16 h-16 md:w-20 md:h-20 border-4 border-amber-500/30 border-t-amber-500 rounded-full mb-6"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           aria-hidden="true"
@@ -1027,7 +899,7 @@ const AboutMe = () => {
         
         <div className="w-48 md:w-64 h-1 bg-white/10 rounded-full overflow-hidden mb-4">
           <motion.div 
-            className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+            className="h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-full"
             initial={{ width: '0%' }}
             animate={{ width: `${loadingProgress}%` }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -1035,134 +907,83 @@ const AboutMe = () => {
         </div>
         
         <p className="text-gray-400 text-sm md:text-base" role="status" aria-live="polite">
-          Loading... {loadingProgress}%
+          Loading Portfolio... {loadingProgress}%
         </p>
       </div>
     );
   }
 
-  // Determine if heavy animations should be disabled
   const heavyAnimationsDisabled = responsive.isMobile || prefersReducedMotion;
 
   return (
     <>
-      {/* Comprehensive SEO and Meta Tags */}
-      <Helmet>
-        <html lang="en" />
-        <title>Bushra Khandoker — Digital Artist & Creative Visionary | Contemporary Art Portfolio</title>
+      {/* Enhanced SEO Meta Tags */}
+      <head>
+        <title>Bushra Khandoker — Multidisciplinary Visual Artist | Sketches, Paintings, 3D Art & Sculpture</title>
         
-        {/* Enhanced Meta Description */}
         <meta 
           name="description" 
-          content="Explore Bushra Khandoker's innovative digital art portfolio. A talented artist from Bangladesh creating abstract, thought-provoking artworks that blend technology with nature. Discover contemporary digital art, creative philosophy, and artistic inspirations." 
+          content="Multidisciplinary artist from Bangladesh — sketches, acrylics, watercolors, 3D modeling, digital art, and sculpture. Transforming imagination into reality." 
         />
         
-        {/* Enhanced Keywords */}
         <meta 
           name="keywords" 
-          content="Bushra Khandoker, digital artist, Bangladesh artist, contemporary art, abstract art, digital art portfolio, creative visionary, technology art, nature-inspired art, modern digital art, artistic philosophy, creative inspirations" 
+          content="Bushra Khandoker, multidisciplinary artist, Bangladesh artist, sketching, acrylic painting, watercolor, 3D modeling, digital art, sculpture, contemporary art, visual artist, traditional art, digital sculpture, art portfolio" 
         />
         
         <meta name="author" content="Bushra Khandoker" />
         <meta name="robots" content="index, follow, max-image-preview:large" />
-        <meta name="googlebot" content="index, follow" />
         
-        {/* Viewport and Mobile Optimization */}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-        <meta name="format-detection" content="telephone=no" />
-        
-        {/* Enhanced Open Graph Tags */}
-        <meta property="og:title" content="Bushra Khandoker — Digital Artist & Creative Visionary" />
-        <meta property="og:description" content="Discover innovative digital artworks by Bushra Khandoker, a talented artist from Bangladesh who creates abstract pieces blending technology with nature." />
+        <meta property="og:title" content="Bushra Khandoker — Multidisciplinary Visual Artist" />
+        <meta property="og:description" content="Explore the diverse artistic practice of Bushra Khandoker, blending traditional techniques with digital innovation to create tangible forms from imagination." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com/about" />
-        <meta property="og:site_name" content="Bushra Khandoker Art Portfolio" />
-        <meta property="og:locale" content="en_US" />
-        <meta property="og:image" content="https://yourdomain.com/social-preview-bushra.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Bushra Khandoker - Digital Artist Portfolio Preview" />
+        <meta property="og:image" content="/assets/Bushra.jpg" />
+        <meta property="og:image:alt" content="Bushra Khandoker - Multidisciplinary Visual Artist" />
         
-        {/* Enhanced Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@bushra_art" />
-        <meta name="twitter:creator" content="@bushra_art" />
-        <meta name="twitter:title" content="Bushra Khandoker — Digital Artist & Creative Visionary" />
-        <meta name="twitter:description" content="Explore contemporary digital art that blends technology with nature. Abstract artworks and creative philosophy by Bangladesh artist Bushra Khandoker." />
-        <meta name="twitter:image" content="https://yourdomain.com/social-preview-bushra.jpg" />
+        <meta name="twitter:title" content="Bushra Khandoker — Multidisciplinary Visual Artist" />
+        <meta name="twitter:description" content="Multidisciplinary artist turning sketches and digital models into paintings and sculptures — crafting tangible forms from imagination." />
         
-        {/* Canonical URL */}
-        <link rel="canonical" href="https://yourdomain.com/about" />
+        <link rel="canonical" href="https://yourdomain.com" />
+        <meta name="theme-color" content="#f59e0b" />
         
-        {/* Preconnect for Performance */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin />
-        
-        {/* Theme Color for Mobile Browsers */}
-        <meta name="theme-color" content="#8b5cf6" />
-        <meta name="msapplication-TileColor" content="#8b5cf6" />
-        
-        {/* Enhanced Structured Data */}
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Person",
           "name": "Bushra Khandoker",
+          "jobTitle": "Multidisciplinary Visual Artist",
+          "description": "Visual artist from Bangladesh specializing in sketching, acrylic and watercolor painting, 3D modeling, digital art, and sculpture",
+          "nationality": "Bangladesh",
           "url": "https://yourdomain.com",
-          "image": "https://yourdomain.com/assets/Bushra.jpg",
-          "sameAs": [
-            "https://instagram.com/bushra_art",
-            "https://twitter.com/bushra_art",
-            "https://linkedin.com/in/bushra-khandoker"
-          ],
-          "jobTitle": "Digital Artist",
-          "worksFor": {
-            "@type": "Organization",
-            "name": "Independent Artist"
-          },
-          "nationality": {
-            "@type": "Country",
-            "name": "Bangladesh"
-          },
-          "description": "Digital artist and creative visionary from Bangladesh, specializing in abstract artworks that blend technology with nature.",
+          "image": "/assets/Bushra.jpg",
           "knowsAbout": [
+            "Sketching",
+            "Acrylic Painting", 
+            "Watercolor Painting",
+            "3D Modeling",
             "Digital Art",
-            "Abstract Art",
+            "Sculpture",
             "Contemporary Art",
-            "Creative Technology",
-            "Visual Design"
+            "Mixed Media"
           ],
-          "alumniOf": {
-            "@type": "EducationalOrganization",
-            "name": "Art Institution"
+          "artform": ["Traditional Art", "Digital Art", "Sculpture"],
+          "hasOccupation": {
+            "@type": "Occupation",
+            "name": "Visual Artist",
+            "occupationLocation": {
+              "@type": "Country",
+              "name": "Bangladesh"
+            }
           }
         })}</script>
-
-        {/* Additional Structured Data for Creative Work */}
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "CreativeWork",
-          "name": "Bushra Khandoker Art Portfolio",
-          "author": {
-            "@type": "Person",
-            "name": "Bushra Khandoker"
-          },
-          "description": "A collection of digital artworks exploring the intersection of technology and nature",
-          "dateCreated": "2024",
-          "inLanguage": "en-US",
-          "genre": "Digital Art",
-          "artform": "Digital Art"
-        })}</script>
-      </Helmet>
+      </head>
 
       <main 
         className="min-h-screen bg-black text-white relative overflow-x-hidden"
         role="main"
-        aria-label="Bushra Khandoker - Digital Artist Portfolio"
+        aria-label="Bushra Khandoker Portfolio - Multidisciplinary Visual Artist"
       >
-        {/* Performance-conscious UI elements */}
         <ScrollProgress />
-        
-   
         
         <BackgroundElements 
           reducedMotion={prefersReducedMotion} 
@@ -1174,13 +995,11 @@ const AboutMe = () => {
           deviceType={responsive.deviceType}
         />
 
-        {/* Main Content */}
         <div className="relative z-10">
           <div className="max-w-8xl mx-auto">
-            {/* Skip to main content link for accessibility */}
             <a 
               href="#hero" 
-              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-purple-600 text-white px-4 py-2 rounded-md z-50"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-amber-600 text-white px-4 py-2 rounded-md z-50"
             >
               Skip to main content
             </a>
@@ -1200,21 +1019,17 @@ const AboutMe = () => {
               isMobile={responsive.isMobile}
             />
             
-            <InspirationsSection 
+            <MediumsSection 
               reducedMotion={prefersReducedMotion}
               deviceType={responsive.deviceType}
             />
-            
 
-            
-           
+
           </div>
         </div>
-
-        {/* Performance monitoring and error boundary would go here in production */}
       </main>
     </>
   );
 };
 
-export default AboutMe;
+export default BushraPortfolio;
